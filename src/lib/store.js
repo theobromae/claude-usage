@@ -22,8 +22,17 @@ function readJSON(name, fallback = null) {
 function writeJSON(name, data) {
   fs.mkdirSync(DIR, { recursive: true });
   const tmp = file(name) + '.' + process.pid + '.tmp';
-  fs.writeFileSync(tmp, JSON.stringify(data));
-  fs.renameSync(tmp, file(name));
+  const json = JSON.stringify(data);
+  fs.writeFileSync(tmp, json);
+  try {
+    fs.renameSync(tmp, file(name));
+  } catch {
+    // Windows bisa menolak rename bila file tujuan sedang dibuka proses lain; tulis langsung sebagai cadangan.
+    fs.writeFileSync(file(name), json);
+    try {
+      fs.unlinkSync(tmp);
+    } catch {}
+  }
 }
 
 module.exports = { DIR, readJSON, writeJSON };

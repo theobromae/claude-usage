@@ -10,7 +10,7 @@
   var demo = params.get('demo'); // ?demo=1 | offer | night | full
 
   var LS_KEY = 'claude-usage.settings';
-  var settings = { night: 'auto', anim: true, wake: false, snoozeUntil: 0 };
+  var settings = { night: 'auto', anim: true, wake: true, snoozeUntil: 0 };
   try {
     Object.assign(settings, JSON.parse(localStorage.getItem(LS_KEY) || '{}'));
   } catch (e) {}
@@ -205,20 +205,58 @@
   }
 
   /* ---------- layar tetap menyala ---------- */
+  // Cara utama: Screen Wake Lock API (hanya di koneksi aman: https atau localhost).
+  // Cadangan: video hitam kecil yang diputar berulang (perlu satu ketukan), jalan juga lewat http://IP-LAN.
   var wakeLock = null;
+  var sleepVideo = null;
+  var armed = false;
   function wakeSupported() {
     return 'wakeLock' in navigator;
   }
+  function stopFallback() {
+    if (sleepVideo) {
+      sleepVideo.pause();
+      sleepVideo.remove();
+      sleepVideo = null;
+    }
+  }
+  function startFallback() {
+    if (sleepVideo || !window.NOSLEEP_MP4) return;
+    var v = document.createElement('video');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('aria-hidden', 'true');
+    v.muted = true;
+    v.loop = true;
+    v.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0.01;pointer-events:none';
+    v.src = window.NOSLEEP_MP4;
+    document.body.appendChild(v);
+    v.play().then(function () { sleepVideo = v; }).catch(function () { v.remove(); });
+  }
+  function armFallback() {
+    if (armed) return;
+    armed = true;
+    var go = function () {
+      armed = false;
+      document.removeEventListener('pointerdown', go, true);
+      if (settings.wake) startFallback();
+    };
+    document.addEventListener('pointerdown', go, true);
+  }
   function applyWake() {
-    if (!wakeSupported()) return;
-    if (settings.wake && !wakeLock && document.visibilityState === 'visible') {
-      navigator.wakeLock.request('screen').then(function (l) {
-        wakeLock = l;
-        l.addEventListener('release', function () { wakeLock = null; });
-      }).catch(function () {});
-    } else if (!settings.wake && wakeLock) {
-      wakeLock.release();
-      wakeLock = null;
+    if (!settings.wake) {
+      if (wakeLock) { wakeLock.release(); wakeLock = null; }
+      stopFallback();
+      return;
+    }
+    if (wakeSupported()) {
+      if (!wakeLock && document.visibilityState === 'visible') {
+        navigator.wakeLock.request('screen').then(function (l) {
+          wakeLock = l;
+          l.addEventListener('release', function () { wakeLock = null; });
+        }).catch(function () { armFallback(); });
+      }
+    } else if (!sleepVideo) {
+      armFallback();
     }
   }
   document.addEventListener('visibilitychange', function () {
@@ -239,14 +277,18 @@
     $('optNote').value = offer.note || '';
     $('wakeHint').textContent = wakeSupported()
       ? ''
-      : 'Tidak tersedia di koneksi ini. Atur Auto-Lock perangkat ke "Tidak pernah" saat dashboard dipakai.';
-    $('optWake').disabled = !wakeSupported();
+      : 'Mode cadangan: ketuk layar sekali setelah halaman dibuka agar layar tetap menyala. Jika tetap padam, atur Auto-Lock perangkat ke "Tidak pernah".';
     dlg.showModal();
   }
   $('gear').addEventListener('click', openSettings);
   $('optNight').addEventListener('change', function (e) { settings.night = e.target.value; saveSettings(); render(); });
   $('optAnim').addEventListener('change', function (e) { settings.anim = e.target.checked; saveSettings(); render(); });
-  $('optWake').addEventListener('change', function (e) { settings.wake = e.target.checked; saveSettings(); applyWake(); });
+  $('optWake').addEventListener('change', function (e) {
+    settings.wake = e.target.checked;
+    saveSettings();
+    applyWake();
+    if (settings.wake && !wakeSupported()) startFallback(); // perubahan ini sendiri adalah ketukan pengguna
+  });
   function pushOffer() {
     settings.snoozeUntil = 0;
     saveSettings();

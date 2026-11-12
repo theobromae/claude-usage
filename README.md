@@ -32,13 +32,26 @@ Lalu kirim satu pesan di Claude Code agar data pertama masuk.
 - Lepas kapan saja: `node src/setup.js uninstall`.
 - Cek keadaan: `node src/setup.js status`.
 
+### Windows (PowerShell)
+
+Semua perintah di atas sama persis di PowerShell, karena yang dijalankan adalah Node (butuh Node 18+ dan Git):
+
+```powershell
+git clone https://github.com/<username>/claude-usage.git
+cd claude-usage
+node src/setup.js
+node src/server.js --lan
+```
+
+Saat pertama kali dengan `--lan`, Windows Defender Firewall akan bertanya apakah Node boleh menerima koneksi. Pilih **Jaringan pribadi** agar HP/tablet bisa membuka dashboard. Pengaturan Claude Code ada di `%USERPROFILE%\.claude\settings.json`, dan data dashboard di `%USERPROFILE%\.claude\claude-usage\`.
+
 ### Tampil di HP / tablet (nightstand)
 
 ```bash
 node src/server.js --lan
 ```
 
-Server mencetak alamat seperti `http://192.168.x.x:4747`. Buka di HP/tablet yang sama wifinya. Ketuk dua kali untuk layar penuh (jika didukung). Di iPhone, pilih Bagikan, lalu Tambah ke Layar Utama, supaya tampil tanpa bilah Safari, dan atur Auto-Lock ke "Tidak pernah".
+Server mencetak alamat seperti `http://192.168.x.x:4747`. Buka di HP/tablet yang sama wifinya. Ketuk dua kali untuk layar penuh (jika didukung). Di iPhone, pilih Bagikan, lalu Tambah ke Layar Utama, supaya tampil tanpa bilah Safari. Lihat bagian "Layar tetap menyala" di bawah.
 
 Mode `--lan` membuka server ke seluruh jaringan wifi Anda (tanpa login). Isinya hanya persentase pemakaian, tetapi pakai hanya di jaringan yang Anda percaya.
 
@@ -49,11 +62,19 @@ Mode `--lan` membuka server ke seluruh jaringan wifi Anda (tanpa login). Isinya 
 - **Penawaran reset**: nyalakan di pengaturan (ikon gigi di kiri atas) atau dengan `curl`. Kartu penawaran menggantikan cincin mingguan. Tombol **Reset sekarang** hanya mengosongkan *tampilan* dashboard sampai data resmi berikutnya masuk. Tombol ini tidak mereset limit di Claude. **Nanti** menyembunyikan kartu 30 menit.
 - **Animasi sederhana**: cincin menggambar dari kosong, angka menghitung naik, cincin berdenyut halus saat kritis, kartu penawaran muncul meluncur. Mati otomatis bila perangkat memakai "kurangi gerakan"; bisa dimatikan di pengaturan.
 - **Anti burn-in OLED**: tampilan bergeser beberapa piksel tiap menit.
+- **Layar tetap menyala**: aktif secara default (bisa dimatikan di pengaturan). Memakai Screen Wake Lock API bila tersedia, yaitu di `localhost` atau https. Di `http://IP-LAN` (cara umum membuka dari HP) API itu diblokir browser, sehingga dipakai mode cadangan berupa video hitam kecil yang diputar berulang. Mode cadangan perlu **satu ketukan** di layar setelah halaman dibuka, dan hasilnya bergantung pada perangkat. Jika layar tetap padam, atur Auto-Lock/waktu layar mati perangkat ke "Tidak pernah".
 
 ```bash
-# nyalakan / matikan penawaran dari terminal
+# nyalakan / matikan penawaran dari terminal (macOS/Linux)
 curl -X POST localhost:4747/offer -H 'X-Requested-With: claude-usage' \
   -H 'Content-Type: application/json' -d '{"active":true,"note":"Berlaku sampai 15:00"}'
+```
+
+```powershell
+# versi PowerShell (di PowerShell, curl adalah alias Invoke-WebRequest, jadi pakai ini)
+Invoke-RestMethod -Method Post -Uri http://localhost:4747/offer `
+  -Headers @{ 'X-Requested-With' = 'claude-usage' } -ContentType 'application/json' `
+  -Body '{"active":true,"note":"Berlaku sampai 15:00"}'
 ```
 
 Penawaran dari Claude tidak bisa dideteksi otomatis, jadi penandanya dinyalakan manual.

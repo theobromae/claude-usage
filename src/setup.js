@@ -13,7 +13,9 @@ const CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.cl
 const SETTINGS = path.join(CONFIG_DIR, 'settings.json');
 const BACKUP = SETTINGS + '.claude-usage.bak';
 const SCRIPT = path.join(__dirname, 'statusline.js');
-const COMMAND = `node "${SCRIPT}"`;
+// Slash biasa (bukan backslash) agar perintah sama persis di PowerShell, cmd, dan bash (Git Bash);
+// Node di Windows menerima path dengan slash.
+const COMMAND = `node "${SCRIPT.replace(/\\/g, '/')}"`;
 
 // Milik kita bila persis sama dengan perintah yang kita pasang (sekarang atau sebelumnya, mis. setelah folder dipindah).
 function isOurs(cmd) {
