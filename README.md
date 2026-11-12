@@ -55,6 +55,42 @@ Server mencetak alamat seperti `http://192.168.x.x:4747`. Buka di HP/tablet yang
 
 Mode `--lan` membuka server ke seluruh jaringan wifi Anda (tanpa login). Isinya hanya persentase pemakaian, tetapi pakai hanya di jaringan yang Anda percaya.
 
+### Jalan otomatis saat Windows menyala
+
+Agar server tidak perlu dijalankan manual, pasang sebagai tugas Task Scheduler untuk akun Anda (tanpa hak administrator):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\windows-autostart.ps1 -Action Install
+# tambahkan -Lan bila HP/tablet membuka lewat IP wifi (tidak perlu jika memakai Tailscale Serve di bawah)
+```
+
+Tugas `ClaudeUsageServer` jalan tersembunyi setiap login, restart otomatis bila berhenti, dan tidak dibatasi 72 jam bawaan Task Scheduler. Perintah lain: `-Action Status` (cek keadaan) dan `-Action Uninstall` (hapus). Via npm: `npm run autostart`, `npm run autostart:status`, `npm run autostart:remove` (tambahan opsi: `npm run autostart -- -Lan`).
+
+`-ExecutionPolicy Bypass` hanya berlaku untuk satu perintah itu, jadi kebijakan skrip PowerShell Anda tidak diubah. Server baru jalan setelah Anda login, bukan sebelum.
+
+### HP tidak harus satu wifi: pakai Tailscale
+
+HP hanya perlu **punya jalur ke komputer**: wifi yang sama, atau [Tailscale](https://tailscale.com). Tailscale membuat jaringan pribadi (*tailnet*) antar perangkat Anda lewat internet, sehingga HP di data seluler atau wifi lain tetap bisa membuka dashboard seolah satu jaringan. Pasang aplikasi Tailscale di komputer dan HP, lalu login dengan akun yang sama.
+
+Ada dua cara:
+
+**A. Sederhana (HTTP).** Jalankan server dengan `--lan`, lalu buka `http://<IP-Tailscale-komputer>:4747` (IP berawalan `100.`, tampil di aplikasi Tailscale dan dicetak server) atau `http://<nama-komputer>:4747` bila MagicDNS aktif. Layar tetap menyala memakai mode cadangan (perlu satu ketukan).
+
+**B. Disarankan (HTTPS, hanya tailnet).** Biarkan server hanya di `localhost` (tanpa `--lan`), lalu di PowerShell:
+
+```powershell
+tailscale serve --bg 4747
+tailscale serve status    # menampilkan alamat https://<komputer>.<tailnet>.ts.net
+```
+
+Buka alamat itu di HP. Selain tidak membuka server ke wifi, alamat HTTPS membuat Wake Lock API bekerja penuh, jadi layar tetap menyala tanpa mode cadangan. Perlu sekali saja: di [admin console Tailscale](https://login.tailscale.com/admin/dns), halaman DNS, aktifkan **MagicDNS** dan **HTTPS Certificates** (jika belum, perintah `tailscale serve` akan menampilkan tautan untuk mengaktifkan). Konfigurasi ini bertahan setelah restart; lepas dengan `tailscale serve reset`.
+
+Catatan keamanan:
+
+- **Jangan** pakai `tailscale funnel`: itu membuka dashboard ke seluruh internet. `serve` hanya untuk perangkat dalam tailnet Anda.
+- Mengaktifkan HTTPS Certificates membuat nama mesin tercantum di daftar sertifikat publik. Jangan beri komputer nama yang sensitif.
+- Dashboard tidak punya login; batas aksesnya adalah tailnet (atau wifi, bila memakai `--lan`).
+
 ## Fitur
 
 - **Dua cincin**: sesi 5 jam (oranye) dan mingguan (biru). Warna berubah kuning di 75% dan merah di 90%; di 100% tampil "LIMIT HABIS".

@@ -9,6 +9,9 @@
     "lan": "node src/server.js --lan",
     "setup": "node src/setup.js install",
     "uninstall": "node src/setup.js uninstall",
+    "autostart": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows-autostart.ps1 -Action Install",
+    "autostart:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows-autostart.ps1 -Action Status",
+    "autostart:remove": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows-autostart.ps1 -Action Uninstall",
     "test": "node --test"
   }
 }
