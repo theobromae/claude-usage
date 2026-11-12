@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Claude Usage</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage" id="stage">
+  <button class="gear" id="gear" type="button" aria-label="Pengaturan">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+  </button>
+  <div class="stamp" id="stamp"></div>
+
+  <main class="grid" id="grid">
+    <section class="col" id="colFive">
+      <div class="ring" role="img" aria-label="Sesi 5 jam">
+        <svg viewBox="0 0 210 210" aria-hidden="true">
+          <circle class="track" cx="105" cy="105" r="92"></circle>
+          <circle class="arc" cx="105" cy="105" r="92" transform="rotate(-90 105 105)"></circle>
+        </svg>
+        <div class="ring-center">
+          <div class="pct"><span class="num">--</span><span class="unit">%</span></div>
+          <div class="cap">MENUNGGU DATA</div>
+        </div>
+      </div>
+      <div class="info">
+        <div class="label">SESI 5 JAM</div>
+        <div class="big">—</div>
+        <div class="sub"></div>
+        <div class="mini" hidden></div>
+      </div>
+    </section>
+
+    <section class="col" id="colWeek">
+      <div class="ring" role="img" aria-label="Pemakaian mingguan">
+        <svg viewBox="0 0 210 210" aria-hidden="true">
+          <circle class="track" cx="105" cy="105" r="92"></circle>
+          <circle class="arc" cx="105" cy="105" r="92" transform="rotate(-90 105 105)"></circle>
+        </svg>
+        <div class="ring-center">
+          <div class="pct"><span class="num">--</span><span class="unit">%</span></div>
+          <div class="cap">MENUNGGU DATA</div>
+        </div>
+      </div>
+      <div class="info">
+        <div class="label">MINGGUAN</div>
+        <div class="big">—</div>
+        <div class="sub"></div>
+      </div>
+    </section>
+
+    <section class="offer" id="offer" hidden aria-live="polite">
+      <div class="offer-kicker">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+        PENAWARAN DARI CLAUDE
+      </div>
+      <h2 class="offer-title" id="offerTitle"></h2>
+      <p class="offer-note" id="offerNote"></p>
+      <div class="offer-actions">
+        <button type="button" class="btn primary" id="btnReset">Reset sekarang</button>
+        <button type="button" class="btn ghost" id="btnLater">Nanti</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="settings" aria-labelledby="settingsTitle">
+  <form method="dialog" class="settings-form">
+    <h2 id="settingsTitle">Pengaturan</h2>
+    <div class="cards">
+      <fieldset class="card">
+        <legend>TAMPILAN</legend>
+        <label class="row">Mode malam
+          <select id="optNight">
+            <option value="auto">Otomatis (22:00–05:00)</option>
+            <option value="day">Selalu normal</option>
+            <option value="night">Selalu malam</option>
+          </select>
+        </label>
+        <label class="row">Animasi <input type="checkbox" id="optAnim"></label>
+        <label class="row">Layar tetap menyala <input type="checkbox" id="optWake"></label>
+        <p class="hint" id="wakeHint"></p>
+      </fieldset>
+      <fieldset class="card">
+        <legend>PENAWARAN RESET</legend>
+        <label class="row">Ada penawaran aktif <input type="checkbox" id="optOffer"></label>
+        <label class="col-field">Catatan penawaran
+          <input type="text" id="optNote" maxlength="200" placeholder="mis. Berlaku sampai 15:00">
+        </label>
+        <p class="hint">Tombol Reset sekarang hanya mengosongkan tampilan dashboard. Limit di Claude tidak berubah.</p>
+      </fieldset>
+    </div>
+    <div class="settings-actions"><button class="btn primary" value="close">Selesai</button></div>
+  </form>
+</dialog>
+
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

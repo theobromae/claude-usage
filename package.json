@@ -1,0 +1,14 @@
+{
+  "name": "claude-usage",
+  "version": "1.0.0",
+  "description": "Dashboard ala nightstand/StandBy iPhone untuk limit 5 jam dan mingguan Claude. Tanpa dependensi.",
+  "private": false,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node src/server.js",
+    "lan": "node src/server.js --lan",
+    "setup": "node src/setup.js install",
+    "uninstall": "node src/setup.js uninstall",
+    "test": "node --test"
+  }
+}
